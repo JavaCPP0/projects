@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  userId    Int      @id @default(autoincrement()) @map("userId")
+  email     String   @unique @map("email")
+  password  String   @map("password")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  character Character[] //사용자(Users) 테이블과 캐릭터(Character) 테이블이 1:N 관계를 맺습니다.
+
+  @@map("Users")
+}
+
+//하나의 계정은 여러개의 캐릭터를 보유할 수 있어요!
+model Character {
+  charId         Int      @id @default(autoincrement()) @map("charId")
+  userId         Int      @map("userId")
+  nickName       String   @unique @map("nickNAme")
+  health         Int      @default(500) @map("health")
+  power          Int      @default(100) @map("power")
+  money          Int      @default(10000) @map("money")
+  charInvenId    Int      @map("charInvenId") //캐릭인벤
+  charItemsSetId Int      @map("charItemsSetId") //캐릭장착셋
+  createdAt      DateTime @default(now()) @map("createdAt")
+  updatedAt      DateTime @updatedAt @map("updatedAt")
+
+  user Users @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  charInventory CharInventory?
+  charItemsSet  CharItemsSet?
+
+  @@map("Character")
+}
+
+//캐릭터가 보유는 하고있으나 장착하고 있지 않은 아이템 정보들이 담겨져있겠죠?
+model CharInventory {
+  charInvenId Int @id @default(autoincrement()) @map("charInvenId")
+  charId      Int @unique @map("charId")
+
+  character Character @relation(fields: [charId], references: [charId], onDelete: Cascade)
+  // Items와의 1:N 관계
+  items     Items[]   @relation("ItemsToInventory")
+
+  @@map("CharInventory")
+}
+
+//이 테이블엔 실제로 캐릭터가 장착한 아이템 정보들이 존재해야 합니다
+model CharItemsSet {
+  charItemsSetId Int @id @default(autoincrement()) @map("charItemsSetId")
+  charId         Int @unique @map("charId")
+
+  character Character @relation(fields: [charId], references: [charId], onDelete: Cascade)
+
+  // Items와의 1:N 관계
+  items Items[] @relation("ItemsToItemsSet")
+
+  @@map("CharItemsSet")
+}
+
+//아이템 생성 API를 통해 생성된 아이템 정보는 아이템 테이블에 저장되어야 합니다. 
+model Items {
+  itemId         Int    @id @default(autoincrement()) @map("itemId")
+  charItemsSetId Int?   @map("charItemsSetId")
+  charInvenId    Int?   @map("charInvenId")
+  name           String @map("name")
+  power          Int    @map("power")
+  health         Int    @map("health")
+
+  // charInventory와의 관계
+  charInventory CharInventory? @relation(fields: [charInvenId], references: [charInvenId], onDelete: SetNull, name: "ItemsToInventory")
+  // CharItemsSet와의 관계
+  charItemsSet  CharItemsSet?  @relation(fields: [charItemsSetId], references: [charItemsSetId], onDelete: SetNull, name: "ItemsToItemsSet")
+
+  @@map("Items")
+}
