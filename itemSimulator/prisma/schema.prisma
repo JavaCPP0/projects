@@ -13,31 +13,37 @@ model Users {
   password  String      @map("password")
   createdAt DateTime    @default(now()) @map("createdAt")
   updatedAt DateTime    @updatedAt @map("updatedAt")
+  role      Role        @default(user)
   character Character[]
 
   @@map("Users")
 }
 
+enum Role {
+  user
+  admin
+}
+
 model Character {
-  charId         Int            @id @default(autoincrement()) @map("charId")
-  userId         Int            @map("userId")
-  nickName       String         @unique @map("nickName")
-  health         Int            @default(500) @map("health")
-  power          Int            @default(100) @map("power")
-  money          Int            @default(10000) @map("money")
-  createdAt      DateTime       @default(now()) @map("createdAt")
-  updatedAt      DateTime       @updatedAt @map("updatedAt")
-  user           Users          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  charId        Int            @id @default(autoincrement()) @map("charId")
+  userId        Int            @map("userId")
+  nickName      String         @unique @map("nickName")
+  health        Int            @default(500) @map("health")
+  power         Int            @default(100) @map("power")
+  money         Int            @default(10000) @map("money")
+  createdAt     DateTime       @default(now()) @map("createdAt")
+  updatedAt     DateTime       @updatedAt @map("updatedAt")
+  user          Users          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  CharInventory CharInventory?
+  CharItemsSet  CharItemsSet?
 
   @@index([userId], map: "Character_userId_fkey")
   @@map("Character")
-  CharInventory CharInventory?
-  CharItemsSet CharItemsSet?
 }
 
 model CharInventory {
   charInvenId Int       @id @default(autoincrement()) @map("charInvenId")
-  charId      Int       @unique @map("charId")  
+  charId      Int       @unique @map("charId")
   character   Character @relation(fields: [charId], references: [charId], onDelete: Cascade)
   items       Items[]   @relation("ItemsToInventory")
 

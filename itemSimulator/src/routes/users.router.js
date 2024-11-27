@@ -3,6 +3,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import { Prisma } from "@prisma/client";
 import { prisma } from '../utils/prisma/index.js';
+import authMiddleware from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
@@ -56,6 +57,38 @@ router.post('/sign-in', async (req, res, next) => {
   // authotization 쿠키에 Berer 토큰 형식으로 JWT를 저장합니다.
   res.cookie('authorization', `Bearer ${token}`);
   return res.status(200).json({ message: '로그인 성공' });
+});
+
+//회원 탈퇴
+router.delete("/users", authMiddleware, async (req, res, next) => {
+  try {
+    const { email,password } = req.body;
+    
+
+    // 회원 정보 조회
+    const users = await prisma.users.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    // 회원이 존재하지 않으면 404 반환
+    if (!users) {
+      return res.status(404).json({ message: "회원이 존재하지 않습니다." });
+    }
+
+    // 비밀번호 확인
+    if (!(await bcrypt.compare(password, users.password))){
+      return res.status(401).json({ message: "비밀번호가 일치하지 않습니다." });
+    }
+
+    // 회원 탈퇴
+    await prisma.users.delete({ where: { email: email } });
+
+    return res.status(200).json({ data: "회원이 탈퇴되었습니다." });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 export default router;

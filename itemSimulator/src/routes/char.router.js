@@ -43,6 +43,7 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
 router.delete("/characters/:charId", authMiddleware, async (req, res, next) => {
   try {
     const { charId } = req.params;
+    console.log(req.body)
     const { password } = req.body;
 
     // 캐릭터 정보 조회
@@ -103,8 +104,7 @@ router.get("/characters/:charId", authMiddleware, async (req, res, next) => {
     });
     return res.status(200).json({ data: character });
 
-  } else{
-
+  } else{ //다른사람의 캐릭터를 조회하면 일부분만 조회 가능
     const character = await prisma.character.findFirst({
         where: { charId: +charId },
         select: {
