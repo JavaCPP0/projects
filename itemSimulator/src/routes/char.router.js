@@ -7,7 +7,7 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-//캐릭터 생성
+//캐릭터 생성 API
 router.post("/characters", authMiddleware, async (req, res, next) => {
   try {
     const { nickName } = req.body;

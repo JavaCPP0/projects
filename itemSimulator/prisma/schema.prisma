@@ -66,6 +66,7 @@ model Items {
   name           String         @map("name")
   power          Int            @map("power")
   health         Int            @map("health")
+  price          Int            @map("price")
   charInventory  CharInventory? @relation("ItemsToInventory", fields: [charInvenId], references: [charInvenId])
   charItemsSet   CharItemsSet?  @relation("ItemsToItemsSet", fields: [charItemsSetId], references: [charItemsSetId])
 
