@@ -25,21 +25,19 @@ model Character {
   health         Int            @default(500) @map("health")
   power          Int            @default(100) @map("power")
   money          Int            @default(10000) @map("money")
-  charInvenId    Int            @map("charInvenId")
-  charItemsSetId Int            @map("charItemsSetId")
   createdAt      DateTime       @default(now()) @map("createdAt")
   updatedAt      DateTime       @updatedAt @map("updatedAt")
-  charInventory  Int?           @map("charInventory")
-  charItemsSet   Int?           @map("charItemsSet")
   user           Users          @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@index([userId], map: "Character_userId_fkey")
   @@map("Character")
+  CharInventory CharInventory?
+  CharItemsSet CharItemsSet?
 }
 
 model CharInventory {
   charInvenId Int       @id @default(autoincrement()) @map("charInvenId")
-  charId      Int       @unique @map("charId")
+  charId      Int       @unique @map("charId")  
   character   Character @relation(fields: [charId], references: [charId], onDelete: Cascade)
   items       Items[]   @relation("ItemsToInventory")
 
