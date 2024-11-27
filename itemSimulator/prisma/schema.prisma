@@ -67,6 +67,7 @@ model Items {
   power          Int            @map("power")
   health         Int            @map("health")
   price          Int            @map("price")
+  stack          Int            @default(1) @map("stack")
   charInventory  CharInventory? @relation("ItemsToInventory", fields: [charInvenId], references: [charInvenId])
   charItemsSet   CharItemsSet?  @relation("ItemsToItemsSet", fields: [charItemsSetId], references: [charItemsSetId])
 

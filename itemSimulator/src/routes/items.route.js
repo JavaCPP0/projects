@@ -65,19 +65,61 @@ router.patch("/items/:itemId", authMiddleware, async (req, res, next) => {
   }
 });
 
-//아이템 목록 조회
+//아이템 목록 조회 API
 router.get("/items", async (req, res, next) => {
   const items = await prisma.items.findMany({
     select: {
       itemId: true,
       name: true,
-      health: true,
-      power: true,
       price: true,
     },
   });
 
   return res.status(200).json({ data: items });
 });
+
+//아이템 상세 조회 API
+router.get("/items/:itemId", async (req, res, next) => {
+    const { itemId } = req.params; //params로 전달받은 값은 string이다
+  
+    const items = await prisma.items.findFirst({
+      where: {
+        itemId: +itemId, //+를 붙이면 자동으로 int로 바뀜
+      },
+      select: {
+        itemId: true,
+        name: true,
+        health: true,
+        power: true,
+        price: true,
+      },
+    });
+  
+    return res.status(200).json({ data: items });
+  });
+  
+  //아이템 구매 API
+//   router.patch("/items/buy",authMiddleware,async (req,res,next)=>{
+//     const {itemId,count} = req.body;
+//     const {request}
+
+//     const items = await prisma.items.findFirst({
+//         where:{
+//             itemId: +itemId,
+//         },
+//         select:{
+//             health: true,
+//             power: true,
+//             price: true,
+//         },
+//     });
+
+//     for(let i=0;i<count;i++){
+        
+//     }
+
+//   });
+
+
 
 export default router;
