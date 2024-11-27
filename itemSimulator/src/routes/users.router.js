@@ -9,7 +9,7 @@ const router = express.Router();
 
 /** 사용자 회원가입 API **/
 router.post('/sign-up', async (req, res, next) => {
-  const { email, password} = req.body;
+  const { email, password,role} = req.body;
   const isExistUser = await prisma.users.findFirst({
     where: {
       email,
@@ -28,6 +28,7 @@ router.post('/sign-up', async (req, res, next) => {
     data: {
       email,
       password: hashedPassword, // 암호화된 비밀번호를 저장합니다.
+      role
     },
   });
 

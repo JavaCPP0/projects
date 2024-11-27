@@ -11,7 +11,6 @@ const router = express.Router();
 router.post("/characters", authMiddleware, async (req, res, next) => {
   try {
     const { nickName } = req.body;
-    console.log(req.user);
     const { userId } = req.user;
 
     if (!nickName || typeof nickName !== "string" || nickName.trim() === "") {
@@ -25,14 +24,14 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
       return res.status(409).json({ error: "이미 존재하는 nickName입니다." });
     }
 
-    const post = await prisma.character.create({
+    const character = await prisma.character.create({
       data: {
         userId: +userId,
         nickName: nickName.trim(),
       },
     });
 
-    return res.status(201).json({ data: post });
+    return res.status(201).json({ data: character });
   } catch (error) {
     console.error(error);
     next(error); // 오류 미들웨어로 전달
@@ -43,8 +42,6 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
 router.delete("/characters/:charId", authMiddleware, async (req, res, next) => {
   try {
     const { charId } = req.params;
-    console.log(req.body)
-    const { password } = req.body;
 
     // 캐릭터 정보 조회
     const character = await prisma.character.findUnique({
@@ -65,10 +62,6 @@ router.delete("/characters/:charId", authMiddleware, async (req, res, next) => {
         .json({ message: "자신의 캐릭터만 삭제할 수 있습니다." });
     }
 
-    // 비밀번호 확인
-    if (character.password !== password) {
-      return res.status(401).json({ message: "비밀번호가 일치하지 않습니다." });
-    }
 
     // 캐릭터 삭제
     await prisma.character.delete({ where: { charId: +charId } });
