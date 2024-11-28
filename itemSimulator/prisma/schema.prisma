@@ -34,44 +34,51 @@ model Character {
   createdAt     DateTime       @default(now()) @map("createdAt")
   updatedAt     DateTime       @updatedAt @map("updatedAt")
   user          Users          @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  CharInventory CharInventory?
-  CharItemsSet  CharItemsSet?
 
+
+ CharInventory CharInventory[]
+  CharItemsSet CharItemsSet[]
   @@index([userId], map: "Character_userId_fkey")
   @@map("Character")
 }
 
 model CharInventory {
   charInvenId Int       @id @default(autoincrement()) @map("charInvenId")
-  charId      Int       @unique @map("charId")
-  character   Character @relation(fields: [charId], references: [charId], onDelete: Cascade)
-  items       Items[]   @relation("ItemsToInventory")
+  charId      Int        @map("charId")
+  itemId         Int?             @map("itemId")
+  name           String?         @map("name")
+  power          Int?           @map("power")
+  health         Int?           @map("health")
+  price          Int?            @map("price")
+  stack          Int?            @default(0) @map("stack")
+  Character          Character          @relation(fields: [charId], references: [charId], onDelete: Cascade)
+
 
   @@map("CharInventory")
 }
 
 model CharItemsSet {
   charItemsSetId Int       @id @default(autoincrement()) @map("charItemsSetId")
-  charId         Int       @unique @map("charId")
-  character      Character @relation(fields: [charId], references: [charId], onDelete: Cascade)
-  items          Items[]   @relation("ItemsToItemsSet")
+  charId         Int       @map("charId")
+  itemId         Int?             @map("itemId")
+  name           String?         @map("name")
+  power          Int?            @map("power")
+  health         Int?            @map("health")
+  price          Int?            @map("price")
+  stack          Int?            @default(0) @map("stack")
+  Character          Character          @relation(fields: [charId], references: [charId], onDelete: Cascade)
+
 
   @@map("CharItemsSet")
 }
 
 model Items {
   itemId         Int            @id @default(autoincrement()) @map("itemId")
-  charItemsSetId Int?           @map("charItemsSetId")
-  charInvenId    Int?           @map("charInvenId")
   name           String         @map("name")
   power          Int            @map("power")
   health         Int            @map("health")
   price          Int            @map("price")
-  stack          Int            @default(1) @map("stack")
-  charInventory  CharInventory? @relation("ItemsToInventory", fields: [charInvenId], references: [charInvenId])
-  charItemsSet   CharItemsSet?  @relation("ItemsToItemsSet", fields: [charItemsSetId], references: [charItemsSetId])
-
-  @@index([charInvenId], map: "Items_charInvenId_fkey")
-  @@index([charItemsSetId], map: "Items_charItemsSetId_fkey")
+  stack          Int            @default(0) @map("stack")
+  
   @@map("Items")
 }

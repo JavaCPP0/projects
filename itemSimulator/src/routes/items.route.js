@@ -19,20 +19,11 @@ router.post("/items", authMiddleware, async (req, res, next) => {
       const existingName = await prisma.items.findFirst({
         where: { name },
       });
+
       if (existingName) {
-        const { itemId, stack } = existingName;
-        await prisma.items.update({
-          data: {
-            stack: stack + 1,
-          },
-          where: {
-            itemId: itemId,
-            name: name,
-          },
-        });
         return res
           .status(201)
-          .json({ message: "이미 존재하는 아이템이라 갯수만 늘어납니다." });
+          .json({ message: "이미 존재하는 아이템입니다." });
       }
       //
       const items = await prisma.items.create({
@@ -120,29 +111,89 @@ router.get("/items/:itemId", async (req, res, next) => {
 });
 
 //아이템 구매 API
-router.patch("/items/buy", authMiddleware, async (req, res, next) => {
-  const { name, count,charId } = req.body;
+router.patch("/buyItems", authMiddleware, async (req, res, next) => {
+  const { name, count, charId } = req.body;
   const { userId } = req.user;
 
-  const char = await prisma.character.findFirst({
-    where: {
-      userId: +userId,
-      charId: +charId,
-    },
-  });
+  try {
+    await prisma.$transaction(async (prisma) => {
+      // 캐릭터 찾기
+      const char = await prisma.character.findFirst({
+        where: {
+          userId: +userId,
+          charId: +charId,
+        },
+      });
 
-  const items = await prisma.items.findFirst({
-    where: {
-      name: name,
-    },
-  });
+      if (!char) {
+        return res.status(404).json({ error: "캐릭터를 찾을 수 없습니다." });
+      }
 
- 
+      // 아이템 찾기
+      const items = await prisma.items.findFirst({
+        where: { name: name },
+      });
 
+      if (!items) {
+        return res.status(404).json({ error: "아이템을 찾을 수 없습니다." });
+      }
 
+      const { itemId, power, health, price } = items;
 
+      // 잔액 검사
+      if (char.money < price * count) {
+        throw new Error("잔액이 부족합니다.");
+      }
 
+      // 기존 인벤토리 아이템 찾기
+      const existingItem = await prisma.charInventory.findFirst({
+        where: {
+          charId: +charId,
+          itemId: itemId,
+          name: name
+        },
+      });
 
+      if (existingItem) {
+        // 기존 아이템이 있으면 스택 증가
+        await prisma.charInventory.update({
+          where: { charInvenId: existingItem.charInvenId },
+          data: {
+            stack: existingItem.stack + count,
+          },
+        });
+      } else {
+        // 새로운 아이템 추가
+        await prisma.charInventory.create({
+          data: {
+            charId: +charId,
+            itemId: itemId,
+            name: name,
+            power: power,
+            health: health,
+            price: price,
+            stack: count,
+          },
+        });
+      }
+
+      // 캐릭터 잔액 차감
+      await prisma.character.update({
+        where: { charId: +charId },
+        data: {
+          money: char.money - price * count,
+        },
+      });
+
+      res.status(200).json({ data: { money: char.money - price * count } });
+    });
+  } catch (error) {
+    console.error(error);
+    next(error); // 오류 미들웨어로 전달
+  }
 });
+
+
+
 
 export default router;
