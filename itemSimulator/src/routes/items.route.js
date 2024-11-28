@@ -16,6 +16,25 @@ router.post("/items", authMiddleware, async (req, res, next) => {
     }
     //생성하려는 사용자가 admin권한인지?
     if (req.user.role === "admin") {
+      const existingName = await prisma.items.findFirst({
+        where: { name },
+      });
+      if (existingName) {
+        const { itemId, stack } = existingName;
+        await prisma.items.update({
+          data: {
+            stack: stack + 1,
+          },
+          where: {
+            itemId: itemId,
+            name: name,
+          },
+        });
+        return res
+          .status(201)
+          .json({ message: "이미 존재하는 아이템이라 갯수만 늘어납니다." });
+      }
+      //
       const items = await prisma.items.create({
         data: {
           name: name.trim(),
@@ -25,6 +44,7 @@ router.post("/items", authMiddleware, async (req, res, next) => {
         },
       });
       return res.status(201).json({ data: items });
+      //
     } else {
       return res
         .status(401)
@@ -80,46 +100,49 @@ router.get("/items", async (req, res, next) => {
 
 //아이템 상세 조회 API
 router.get("/items/:itemId", async (req, res, next) => {
-    const { itemId } = req.params; //params로 전달받은 값은 string이다
-  
-    const items = await prisma.items.findFirst({
-      where: {
-        itemId: +itemId, //+를 붙이면 자동으로 int로 바뀜
-      },
-      select: {
-        itemId: true,
-        name: true,
-        health: true,
-        power: true,
-        price: true,
-      },
-    });
-  
-    return res.status(200).json({ data: items });
+  const { itemId } = req.params; //params로 전달받은 값은 string이다
+
+  const items = await prisma.items.findFirst({
+    where: {
+      itemId: +itemId, //+를 붙이면 자동으로 int로 바뀜
+    },
+    select: {
+      itemId: true,
+      name: true,
+      health: true,
+      power: true,
+      price: true,
+      stack: true,
+    },
   });
-  
-  //아이템 구매 API
-//   router.patch("/items/buy",authMiddleware,async (req,res,next)=>{
-//     const {itemId,count} = req.body;
-//     const {request}
 
-//     const items = await prisma.items.findFirst({
-//         where:{
-//             itemId: +itemId,
-//         },
-//         select:{
-//             health: true,
-//             power: true,
-//             price: true,
-//         },
-//     });
+  return res.status(200).json({ data: items });
+});
 
-//     for(let i=0;i<count;i++){
-        
-//     }
+//아이템 구매 API
+router.patch("/items/buy", authMiddleware, async (req, res, next) => {
+  const { name, count,charId } = req.body;
+  const { userId } = req.user;
 
-//   });
+  const char = await prisma.character.findFirst({
+    where: {
+      userId: +userId,
+      charId: +charId,
+    },
+  });
+
+  const items = await prisma.items.findFirst({
+    where: {
+      name: name,
+    },
+  });
+
+ 
 
 
+
+
+
+});
 
 export default router;

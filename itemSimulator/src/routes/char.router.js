@@ -17,10 +17,10 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
       return res.status(400).json({ error: "유효한 nickName을 입력해주세요." });
     }
 
-    const existingPost = await prisma.character.findFirst({
+    const existingName = await prisma.character.findFirst({
       where: { nickName },
     });
-    if (existingPost) {
+    if (existingName) {
       return res.status(409).json({ error: "이미 존재하는 nickName입니다." });
     }
 
@@ -28,6 +28,20 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
       data: {
         userId: +userId,
         nickName: nickName.trim(),
+      },
+    });
+
+    const { charId } = character;
+
+    await prisma.charInventory.create({
+      data: {
+        charId: +charId,
+      },
+    });
+
+    await prisma.charItemsSet.create({
+      data: {
+        charId: +charId,
       },
     });
 
@@ -62,7 +76,6 @@ router.delete("/characters/:charId", authMiddleware, async (req, res, next) => {
         .json({ message: "자신의 캐릭터만 삭제할 수 있습니다." });
     }
 
-
     // 캐릭터 삭제
     await prisma.character.delete({ where: { charId: +charId } });
 
@@ -96,19 +109,18 @@ router.get("/characters/:charId", authMiddleware, async (req, res, next) => {
       },
     });
     return res.status(200).json({ data: character });
-
-  } else{ //다른사람의 캐릭터를 조회하면 일부분만 조회 가능
+  } else {
+    //다른사람의 캐릭터를 조회하면 일부분만 조회 가능
     const character = await prisma.character.findFirst({
-        where: { charId: +charId },
-        select: {
-          nickName: true,
-          health: true,
-          power: true,
-        },
-      });
-      return res.status(200).json({ data: character });
+      where: { charId: +charId },
+      select: {
+        nickName: true,
+        health: true,
+        power: true,
+      },
+    });
+    return res.status(200).json({ data: character });
   }
-
 });
 
 export default router;
