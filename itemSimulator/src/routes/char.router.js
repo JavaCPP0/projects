@@ -31,19 +31,6 @@ router.post("/characters", authMiddleware, async (req, res, next) => {
       },
     });
 
-    const { charId } = character;
-
-    await prisma.charInventory.create({
-      data: {
-        charId: +charId,
-      },
-    });
-
-    await prisma.charItemsSet.create({
-      data: {
-        charId: +charId,
-      },
-    });
 
     return res.status(201).json({ data: character });
   } catch (error) {
