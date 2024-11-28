@@ -306,4 +306,147 @@ router.get("/invenItems/:charId", authMiddleware, async (req, res, next) => {
   }
 });
 
+//아이템 장착 API
+router.patch("/setItems", authMiddleware, async (req, res, next) => {
+  const { name, count, charId } = req.body;
+  const { userId } = req.user;
+
+  try {
+    await prisma.$transaction(async (prisma) => {
+      // 캐릭터 찾기
+      const char = await prisma.character.findFirst({
+        where: {
+          userId: +userId,
+          charId: +charId,
+        },
+      });
+
+      if (!char) {
+        return res.status(404).json({
+          error: "본인의 캐릭터가 아니거나 캐릭터를 찾을 수 없습니다.",
+        });
+      }
+
+      // 인벤토리에서 아이템 찾기
+      const items = await prisma.charInventory.findFirst({
+        where: {
+          charId: +charId,
+          name: name,
+        },
+      });
+
+      if (!items) {
+        return res.status(404).json({ error: "아이템을 찾을 수 없습니다." });
+      }
+
+      const { charInvenId, itemId, power, health, price, stack } = items;
+
+      // 갯수 검사
+      if (stack < count) {
+        return res.status(400).json({ error: "보유한 아이템이 부족합니다." });
+      }
+
+      // 기존 장착 아이템 확인
+      const existingItem = await prisma.charItemsSet.findFirst({
+        where: {
+          charId: +charId,
+          itemId: itemId,
+          name: name,
+        },
+      });
+
+      if (existingItem) {
+        // 기존 아이템 스택 증가
+        await prisma.charItemsSet.update({
+          where: { charItemsSetId: existingItem.charItemsSetId },
+          data: {
+            stack: existingItem.stack + count,
+          },
+        });
+      } else {
+        // 새로운 아이템 장착
+        await prisma.charItemsSet.create({
+          data: {
+            charId: +charId,
+            itemId: itemId,
+            name: name,
+            power: power,
+            health: health,
+            price: price,
+            stack: count,
+          },
+        });
+      }
+
+      // 캐릭터 스탯 상승
+      await prisma.character.update({
+        where: { charId: +charId },
+        data: {
+          health: char.health + health * count,
+          power: char.power + power * count, // 수정: power 반영
+        },
+      });
+
+      // 인벤토리에서 아이템 스택 감소
+      if (stack - count === 0) {
+        // 스택이 0이면 삭제
+        await prisma.charInventory.delete({
+          where: { charInvenId: charInvenId },
+        });
+      } else {
+        // 스택 감소
+        await prisma.charInventory.update({
+          where: { charInvenId: charInvenId },
+          data: {
+            stack: stack - count,
+          },
+        });
+      }
+
+      res.status(200).json({ message: "아이템이 성공적으로 장착되었습니다." });
+    });
+  } catch (error) {
+    console.error(error);
+    next(error); // 오류 미들웨어로 전달
+  }
+});
+
+//장착 아이템 조회 API
+router.get("/setItems/:charId", authMiddleware, async (req, res, next) => {
+  const { userId } = req.user; // 인증된 사용자 ID
+  const { charId } = req.params; // URL 파라미터에서 charId 추출
+
+  try {
+    // 캐릭터 소유권 확인
+    const char = await prisma.character.findFirst({
+      where: {
+        charId: +charId,
+        userId: +userId,
+      },
+    });
+
+    if (!char) {
+      return res.status(404).json({ error: "캐릭터를 찾을 수 없거나 소유권이 없습니다." });
+    }
+
+    // 인벤토리 아이템 조회
+    const items = await prisma.charItemsSet.findMany({
+      where: {
+        charId: +charId,
+      },
+      select: {
+        itemId: true,
+        name: true,
+        stack: true,
+      },
+    });
+
+    // 결과 반환
+    return res.status(200).json({ data: items });
+  } catch (error) {
+    console.error(error);
+    next(error); // 오류 미들웨어로 전달
+  }
+});
+
 export default router;
