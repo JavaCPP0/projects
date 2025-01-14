@@ -65,7 +65,7 @@ class Game {
 
     const locationData = this.users.map((user) => {
       const { x, y } = user.calculatePosition(maxLatency);
-      return { id: user.id, x, y };
+      return { id: user.id,playerId: user.playerId, x, y };
     });
     return createLocationPacket(locationData);
   }

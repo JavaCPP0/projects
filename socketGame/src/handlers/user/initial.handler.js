@@ -3,10 +3,13 @@ import { HANDLER_IDS, RESPONSE_SUCCESS_CODE } from '../../constants/handlerIds.j
 import { createResponse } from '../../utils/response/createResponse.js';
 import { handleError } from '../../utils/error/errorHandler.js';
 import { createUser, findUserByDeviceID, updateUserLogin } from '../../db/user/user.db.js';
+import { getGameSession } from '../../session/game.session.js';
 
 const initialHandler = async ({ socket, userId, payload }) => {
   try {
-    const { deviceId } = payload;
+    const { deviceId,playerId,latency } = payload;
+
+    const session = getGameSession('asd');
 
     let user = await findUserByDeviceID(deviceId);
 
@@ -16,8 +19,11 @@ const initialHandler = async ({ socket, userId, payload }) => {
       await updateUserLogin(user.id);
     }
 
-  addUser(user.id, socket);
-
+    console.log('userId initialHandler!', userId);
+    user = addUser(userId, socket);
+    user.playerId = playerId;
+    user.latency = latency;
+    session.addUser(user);
 
     // 유저 정보 응답 생성
     const initialResponse = createResponse(
