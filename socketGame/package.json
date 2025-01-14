@@ -1,17 +1,26 @@
 {
-  "name": "socketgame",
+  "name": "tcp-game",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
+  "type": "module",
   "scripts": {
-    "dev": "node server.js",
-    "client": "node client.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "lodash": "^4.17.21",
+    "long": "^5.2.3",
+    "mysql2": "^3.9.8",
+    "protobufjs": "^7.3.0",
+    "uuid": "^9.0.1"
+  },
   "devDependencies": {
-    "prettier": "^3.4.2"
+    "nodemon": "^3.1.1",
+    "prettier": "^3.2.5"
   }
 }
