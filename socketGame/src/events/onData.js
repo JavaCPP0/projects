@@ -30,20 +30,6 @@ export const onData = (socket) => async (data) => {
 
       try {
         switch (packetType) {
-          case PACKET_TYPE.PING:
-            {
-              const protoMessages = getProtoMessages();
-              const Ping = protoMessages.common.Ping;
-              const pingMessage = Ping.decode(packet);
-              const user = getUserBySocket(socket);
-              console.log('user PING!', user);
-
-              if (!user) {
-                throw new CustomError(ErrorCodes.USER_NOT_FOUND, '유저를 찾을 수 없습니다.');
-              }
-              user.handlePong(pingMessage);
-            }
-            break;
           case PACKET_TYPE.NORMAL:
             const { handlerId, payload, userId } = packetParser(packet);
 

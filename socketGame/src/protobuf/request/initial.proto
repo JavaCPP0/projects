@@ -2,11 +2,6 @@ syntax = "proto3";
 
 package initial;
 
-// 최초 패킷 구조
-message InitialPacket {
-  string deviceId = 1;
-}
-
 message InitialPayload {
     string deviceId = 1;   // 필수 필드
     uint32 playerId = 2;   // 필수 필드

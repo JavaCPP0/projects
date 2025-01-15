@@ -23,7 +23,11 @@ const initialHandler = async ({ socket, userId, payload }) => {
     user = addUser(userId, socket);
     user.playerId = playerId;
     user.latency = latency;
+    console.log("latency!!",latency);
+    console.log("playerId!!",playerId);
     session.addUser(user);
+    //프로토 서버랑 클라 같은지 자료형같은거 다
+    //패킷길이 맞는지 헤더랑 이런거
 
     // 유저 정보 응답 생성
     const initialResponse = createResponse(
