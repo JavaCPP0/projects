@@ -14,3 +14,4 @@ export const onConnection = (socket) => {
   socket.on('end', onEnd(socket));
   socket.on('error', onError(socket));
 };
+ //onEnd랑 onError의 상태를 어느정도 동기화
