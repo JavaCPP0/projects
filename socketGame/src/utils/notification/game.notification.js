@@ -1,10 +1,10 @@
 import { getProtoMessages } from '../../init/loadProtos.js';
-import { PACKET_TYPE } from '../../constants/header.js';
+import { PACKET_TYPE,TOTAL_LENGTH } from '../../constants/header.js';
 
 const makeNotification = (message, type) => {
   // 패킷 길이 정보를 포함한 버퍼 생성
   const packetLength = Buffer.alloc(4);
-  packetLength.writeUInt32BE(message.length + 1, 0); // 패킷 길이에 타입 바이트 포함
+  packetLength.writeUInt32BE(TOTAL_LENGTH + message.length + 1, 0); // 패킷 길이에 타입 바이트 포함
 
   // 패킷 타입 정보를 포함한 버퍼 생성
   const packetType = Buffer.alloc(1);
