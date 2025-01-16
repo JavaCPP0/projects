@@ -2,11 +2,8 @@ import { config } from '../config/config.js';
 import { PACKET_TYPE } from '../constants/header.js';
 import { packetParser } from '../utils/parser/packetParser.js';
 import { getHandlerById } from '../handlers/index.js';
-import { getUserById, getUserBySocket } from '../session/user.session.js';
+import { getUserById } from '../session/user.session.js';
 import { handleError } from '../utils/error/errorHandler.js';
-import CustomError from '../utils/error/customError.js';
-import { ErrorCodes } from '../utils/error/errorCodes.js';
-import { getProtoMessages } from '../init/loadProtos.js';
 
 export const onData = (socket) => async (data) => {
   // 기존 버퍼에 새로 수신된 데이터를 추가
@@ -30,24 +27,24 @@ export const onData = (socket) => async (data) => {
 
       try {
         switch (packetType) {
-          case PACKET_TYPE.NORMAL:
-            const { handlerId, payload, userId } = packetParser(packet);
+          case PACKET_TYPE.NORMAL: // 일반 패킷 처리
+            const { handlerId, payload, userId } = packetParser(packet); // 패킷 파싱
 
-            const user = getUserById(userId);
+            const user = getUserById(userId); // 유저 정보 가져오기
             // 유저가 접속해 있는 상황에서 시퀀스 검증
             // if (user && user.sequence !== sequence) {
             //   throw new CustomError(ErrorCodes.INVALID_SEQUENCE, '잘못된 호출 값입니다. ');
             // }
 
-            const handler = getHandlerById(handlerId);
+            const handler = getHandlerById(handlerId); // 핸들러 가져오기
             await handler({
               socket,
               userId,
               payload,
-            });
+            }); // 핸들러 호출
         }
       } catch (error) {
-        handleError(socket, error);
+        handleError(socket, error); // 오류 처리
       }
     } else {
       // 아직 전체 패킷이 도착하지 않음

@@ -13,16 +13,16 @@ const protoDir = path.join(__dirname, '../protobuf');
 
 // 주어진 디렉토리 내 모든 proto 파일을 재귀적으로 찾는 함수
 const getAllProtoFiles = (dir, fileList = []) => {
-  const files = fs.readdirSync(dir);
+  const files = fs.readdirSync(dir); // 디렉토리 내 파일 목록 가져오기
   files.forEach((file) => {
     const filePath = path.join(dir, file);
     if (fs.statSync(filePath).isDirectory()) {
-      getAllProtoFiles(filePath, fileList);
+      getAllProtoFiles(filePath, fileList); // 하위 디렉토리 재귀 호출
     } else if (path.extname(file) === '.proto') {
-      fileList.push(filePath);
+      fileList.push(filePath); // .proto 파일 목록에 추가
     }
   });
-  return fileList;
+  return fileList; // 모든 proto 파일 경로 반환
 };
 
 // 모든 proto 파일 경로를 가져옴
@@ -43,18 +43,17 @@ export const loadProtos = async () => {
     for (const [namespace, types] of Object.entries(packetNames)) {
       protoMessages[namespace] = {};
       for (const [type, typeName] of Object.entries(types)) {
-        protoMessages[namespace][type] = root.lookupType(typeName);
+        protoMessages[namespace][type] = root.lookupType(typeName); // Protobuf 타입 등록
       }
     }
 
-    console.log('Protobuf 파일이 로드되었습니다.');
+    console.log('Protobuf 파일이 로드되었습니다.'); // 로드 완료 메시지
   } catch (error) {
-    console.error('Protobuf 파일 로드 중 오류가 발생했습니다:', error);
+    console.error('Protobuf 파일 로드 중 오류가 발생했습니다:', error); // 오류 로그
   }
 };
 
 // 로드된 프로토 메시지들의 얕은 복사본을 반환합니다.
 export const getProtoMessages = () => {
-  // console.log('protoMessages:', protoMessages); // 디버깅을 위해 추가
-  return { ...protoMessages };
+  return { ...protoMessages }; // 프로토 메시지 복사본 반환
 };
