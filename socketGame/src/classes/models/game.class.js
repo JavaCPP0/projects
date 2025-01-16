@@ -5,7 +5,7 @@ import {
   gameStartNotification,
 } from '../../utils/notification/game.notification.js';
 
-const MAX_PLAYERS = 2; // 최대 플레이어 수
+const MAX_PLAYERS = 5; // 최대 플레이어 수
 
 class Game {
   constructor(id) {
@@ -68,13 +68,15 @@ class Game {
   }
 
   // 모든 유저 위치 정보 가져오기
-  getAllLocation() {
+  getAllLocation(userId) {
     const maxLatency = this.getMaxLatency(); // 최대 레이턴시 가져오기
 
-    const locationData = this.users.map((user) => {
-      const { x, y } = user.calculatePosition(maxLatency); // 유저 위치 계산
-      return { id: user.id, playerId: user.playerId, x, y }; // 위치 정보 반환
-    });
+    const locationData = this.users
+      .filter((user) => user.id !== userId) // {{ edit_1 }}: userId와 일치하는 유저 제외
+      .map((user) => {
+        const { x, y } = user.calculatePosition(maxLatency); // 유저 위치 계산
+        return { id: user.id, playerId: user.playerId, x, y }; // 위치 정보 반환
+      });
     return createLocationPacket(locationData); // 위치 패킷 생성 및 반환
   }
 }

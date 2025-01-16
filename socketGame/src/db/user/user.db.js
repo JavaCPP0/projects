@@ -8,12 +8,16 @@ export const findUserByDeviceID = async (deviceId) => {
   return toCamelCase(rows[0]);
 };
 
-export const createUser = async (deviceId) => {
+export const createUser = async (deviceId, x, y) => {
   const id = uuidv4();
-  await pools.USER_DB.query(SQL_QUERIES.CREATE_USER, [id, deviceId]);
+  await pools.USER_DB.query(SQL_QUERIES.CREATE_USER, [id, deviceId, x, y]);
   return { id, deviceId };
 };
 
-export const updateUserLogin = async (id) => {
-  await pools.USER_DB.query(SQL_QUERIES.UPDATE_USER_LOGIN, [id]);
+export const updateUserLogin = async (id, x, y) => {
+  await pools.USER_DB.query(SQL_QUERIES.UPDATE_USER_LOGIN, [x, y, id]);
+};
+
+export const updateUserCoordinates = async (id, x, y) => {
+  await pools.USER_DB.query('UPDATE user SET x = ?, y = ? WHERE device_id = ?', [x, y, id]);
 };

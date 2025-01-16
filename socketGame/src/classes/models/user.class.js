@@ -2,11 +2,11 @@
 import { createPingPacket } from '../../utils/notification/game.notification.js';
 
 class User {
-  constructor(id, socket) {
+  constructor(id, socket,x,y) {
     this.id = id; // 유저 ID
     this.socket = socket; // 소켓 연결
-    this.x = 0; // x 좌표 초기화
-    this.y = 0; // y 좌표 초기화
+    this.x = x; // x 좌표 초기화
+    this.y = y; // y 좌표 초기화
     // this.sequence = 0; // 시퀀스 초기화 (주석 처리됨)
     this.lastUpdateTime = Date.now(); // 마지막 업데이트 시간
   }
