@@ -25,8 +25,6 @@ def scrape_nexon_jobs():
             if new_height == last_height:
                break
             last_height = new_height
-        else:
-            print("채용 공고 섹션을 찾을 수 없습니다.")
 
         # 채용 공고 목록이 로드될 때까지 기다립니다.
         page.wait_for_selector("a[href^='/recruit/']")
@@ -77,7 +75,7 @@ job_list = scrape_nexon_jobs()
 df = pd.DataFrame(job_list)
 
 # DataFrame을 CSV 파일로 저장합니다. 한글이 깨지지 않도록 utf-8-sig 인코딩을 사용합니다.
-df.to_csv("Python_Crawler/scraper/output/nexon_jobs.csv", index=False, encoding="utf-8-sig")
+df.to_csv("scraper/output/nexon_jobs.csv", index=False, encoding="utf-8-sig")
 
 # 저장된 데이터를 콘솔에 출력하여 확인합니다.
 print(df)
