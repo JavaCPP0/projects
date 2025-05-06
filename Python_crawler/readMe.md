@@ -1,11 +1,11 @@
-# 📘 네이버 뉴스 요약 크롤러 (Playwright + KoBART)
+# 네이버 뉴스 요약 크롤러 (Playwright + KoBART)
 
 Python 기반의 이 프로젝트는 네이버 경제 뉴스 기사를 크롤링한 뒤,  
 Hugging Face의 **KoBART 요약 LLM**을 사용하여 내용을 요약하고 CSV 파일로 저장합니다.
 
 ---
 
-## 📌 주요 기능
+## 주요 기능
 
 - Playwright를 이용한 **비동기 웹 크롤링**
 - KoBART 모델로 **뉴스 본문 요약**
@@ -14,7 +14,7 @@ Hugging Face의 **KoBART 요약 LLM**을 사용하여 내용을 요약하고 CSV
 
 ---
 
-## 🧱 설치 및 환경 설정
+## 설치 및 환경 설정
 
 ### 1️⃣ Python 버전 확인
 
